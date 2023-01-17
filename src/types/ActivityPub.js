@@ -71,3 +71,5 @@
  * @typedef {APObject} APCollection
  * @property {(APObject|APLink)[]} items -
  */
+
+export default {}

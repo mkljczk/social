@@ -45,7 +45,7 @@ export default {
 	data() {
 		return {
 			modal: false,
-			current: '',
+			current: 0,
 		}
 	},
 	methods: {

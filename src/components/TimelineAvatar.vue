@@ -15,6 +15,7 @@
 
 <script>
 import NcAvatar from '@nextcloud/vue/dist/Components/NcAvatar.js'
+import { generateUrl } from '@nextcloud/router'
 
 export default {
 	name: 'TimelineAvatar',
@@ -28,11 +29,17 @@ export default {
 		},
 	},
 	computed: {
+		/**
+		 * @return {string}
+		 */
 		userTest() {
 			return this.item.actor_info.preferredUsername
 		},
+		/**
+		 * @return {string}
+		 */
 		avatarUrl() {
-			return OC.generateUrl('/apps/social/api/v1/global/actor/avatar?id=' + this.item.attributedTo)
+			return generateUrl('/apps/social/api/v1/global/actor/avatar?id=' + this.item.account.id)
 		},
 	},
 }

@@ -11,14 +11,14 @@
 				<span class="icon-boost" />
 			</div>
 			<div class="boost">
-				<router-link v-if="!isProfilePage && item.actor_info" :to="{ name: 'profile', params: { account: item.local ? item.actor_info.preferredUsername : item.actor_info.account }}">
+				<router-link v-if="!isProfilePage && item.account" :to="{ name: 'profile', params: { account: isLocal ? item.account.preferredUsername : item.actor_info.account }}">
 					<span v-tooltip.bottom="item.actor_info.account" class="post-author">
-						{{ userDisplayName(item.actor_info) }}
+						{{ userDisplayName(item.account) }}
 					</span>
 				</router-link>
-				<a v-else :href="item.attributedTo">
+				<a v-else :href="item.account.id">
 					<span class="post-author-id">
-						{{ item.attributedTo }}
+						{{ item.account.id }}
 					</span>
 				</a>
 				{{ boosted }}
@@ -51,7 +51,7 @@ export default {
 		Bell,
 	},
 	props: {
-		/** @type {import('vue').PropType<import('../store/timeline.js').APObject>} */
+		/** @type {import('vue').PropType<import('../types/Mastodon.js').Status>} */
 		item: {
 			type: Object,
 			default: () => {},
@@ -61,13 +61,9 @@ export default {
 			default: false,
 		},
 	},
-	data() {
-		return {
-		}
-	},
 	computed: {
 		/**
-		 * @return {import('../store/timeline.js').APObject}
+		 * @return {import('../types/Mastodon.js').Status}
 		 */
 		entryContent() {
 			if (this.item.type === 'Announce') {
@@ -79,7 +75,7 @@ export default {
 			}
 		},
 		/**
-		 * @return {import('../store/timeline.js').APObject}
+		 * @return {import('../types/Mastodon.js').Status}
 		 */
 		isBoost() {
 			if (this.item.type === 'Announce') {
@@ -109,21 +105,21 @@ export default {
 				const keyword = '{' + key + '}'
 				if (typeof this.item.details[key] !== 'string' && this.item.details[key].length > 1) {
 
-					let concatination = ''
+					let concatenation = ''
 					for (const stringKey in this.item.details[key]) {
 
 						if (this.item.details[key].length > 3 && stringKey === '3') {
 							// ellipses the actors' list to 3 actors when it's big
-							concatination = concatination.substring(0, concatination.length - 2)
-							concatination += ' and ' + (this.item.details[key].length - 3).toString() + ' other(s), '
+							concatenation = concatenation.substring(0, concatenation.length - 2)
+							concatenation += ' and ' + (this.item.details[key].length - 3).toString() + ' other(s), '
 							break
 						} else {
-							concatination += this.item.details[key][stringKey] + ', '
+							concatenation += this.item.details[key][stringKey] + ', '
 						}
 					}
 
-					concatination = concatination.substring(0, concatination.length - 2)
-					summary = summary.replace(keyword, concatination)
+					concatenation = concatenation.substring(0, concatenation.length - 2)
+					summary = summary.replace(keyword, concatenation)
 
 				} else {
 					summary = summary.replace(keyword, this.item.details[key])
@@ -132,10 +128,19 @@ export default {
 
 			return summary
 		},
+		/**
+		 * @return {boolean}
+		 */
+		isLocal() {
+			return this.item.account.acct.includes('@')
+		},
 	},
 	methods: {
+		/**
+		 * @param {import('../types/Mastodon.js').Account} actorInfo
+		 */
 		userDisplayName(actorInfo) {
-			return actorInfo.name !== '' ? actorInfo.name : actorInfo.preferredUsername
+			return actorInfo.display_name ?? actorInfo.username
 		},
 	},
 }

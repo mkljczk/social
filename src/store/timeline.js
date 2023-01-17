@@ -67,24 +67,46 @@ const mutations = {
 	addToTimeline(state, data) {
 		data.forEach((post) => Vue.set(state.timeline, post.id, post))
 	},
+	/**
+	 * @param state
+	 * @param {import('../types/Mastodon.js').Status} post
+	 */
 	removePost(state, post) {
 		Vue.delete(state.timeline, post.id)
 	},
 	resetTimeline(state) {
 		state.timeline = {}
 	},
+	/**
+	 * @param state
+	 * @param {string} type
+	 */
 	setTimelineType(state, type) {
 		state.type = type
 	},
 	setTimelineParams(state, params) {
 		state.params = params
 	},
+	/**
+	 * @param state
+	 * @param {boolean} status
+	 */
 	setComposerDisplayStatus(state, status) {
 		state.composerDisplayStatus = status
 	},
+	/**
+	 * @param state
+	 * @param {string} account
+	 */
 	setAccount(state, account) {
 		state.account = account
 	},
+	/**
+	 * @param state
+	 * @param {object} root0
+	 * @param {import('../types/Mastodon.js').Status} root0.post
+	 * @param {object} root0.parentAnnounce
+	 */
 	likePost(state, { post, parentAnnounce }) {
 		if (typeof state.timeline[post.id] !== 'undefined') {
 			Vue.set(state.timeline[post.id].action.values, 'liked', true)
@@ -93,6 +115,12 @@ const mutations = {
 			Vue.set(state.timeline[parentAnnounce.id].cache[parentAnnounce.object].object.action.values, 'liked', true)
 		}
 	},
+	/**
+	 * @param state
+	 * @param {object} root0
+	 * @param {import('../types/Mastodon.js').Status} root0.post
+	 * @param {object} root0.parentAnnounce
+	 */
 	unlikePost(state, { post, parentAnnounce }) {
 		if (typeof state.timeline[post.id] !== 'undefined') {
 			Vue.set(state.timeline[post.id].action.values, 'liked', false)
@@ -101,6 +129,12 @@ const mutations = {
 			Vue.set(state.timeline[parentAnnounce.id].cache[parentAnnounce.object].object.action.values, 'liked', false)
 		}
 	},
+	/**
+	 * @param state
+	 * @param {object} root0
+	 * @param {import('../types/Mastodon.js').Status} root0.post
+	 * @param {object} root0.parentAnnounce
+	 */
 	boostPost(state, { post, parentAnnounce }) {
 		if (typeof state.timeline[post.id] !== 'undefined') {
 			Vue.set(state.timeline[post.id].action.values, 'boosted', true)
@@ -109,6 +143,12 @@ const mutations = {
 			Vue.set(state.timeline[parentAnnounce.id].cache[parentAnnounce.object].object.action.values, 'boosted', true)
 		}
 	},
+	/**
+	 * @param state
+	 * @param {object} root0
+	 * @param {import('../types/Mastodon.js').Status} root0.post
+	 * @param {object} root0.parentAnnounce
+	 */
 	unboostPost(state, { post, parentAnnounce }) {
 		if (typeof state.timeline[post.id] !== 'undefined') {
 			Vue.set(state.timeline[post.id].action.values, 'boosted', false)
@@ -153,6 +193,10 @@ const actions = {
 		context.commit('setTimelineType', 'account')
 		context.commit('setAccount', account)
 	},
+	/**
+	 * @param context
+	 * @param {import('../types/Mastodon.js').Status} post
+	 */
 	async post(context, post) {
 		try {
 			const { data } = await axios.post(generateUrl('apps/social/api/v1/post'), post, {
@@ -166,6 +210,10 @@ const actions = {
 			logger.error('Failed to create a post', { error: error.response })
 		}
 	},
+	/**
+	 * @param context
+	 * @param {import('../types/Mastodon.js').Status} post
+	 */
 	postDelete(context, post) {
 		return axios.delete(generateUrl(`apps/social/api/v1/post?id=${post.id}`)).then((response) => {
 			context.commit('removePost', post)
@@ -175,6 +223,12 @@ const actions = {
 			logger.error('Failed to delete the post', { error })
 		})
 	},
+	/**
+	 * @param context
+	 * @param {object} root0
+	 * @param {import('../types/Mastodon.js').Status} root0.post
+	 * @param {object} root0.parentAnnounce
+	 */
 	postLike(context, { post, parentAnnounce }) {
 		return new Promise((resolve, reject) => {
 			axios.post(generateUrl(`apps/social/api/v1/post/like?postId=${post.id}`)).then((response) => {
@@ -187,6 +241,12 @@ const actions = {
 			})
 		})
 	},
+	/**
+	 * @param context
+	 * @param {object} root0
+	 * @param {import('../types/Mastodon.js').Status} root0.post
+	 * @param {object} root0.parentAnnounce
+	 */
 	postUnlike(context, { post, parentAnnounce }) {
 		return axios.delete(generateUrl(`apps/social/api/v1/post/like?postId=${post.id}`)).then((response) => {
 			context.commit('unlikePost', { post, parentAnnounce })
@@ -199,6 +259,12 @@ const actions = {
 			logger.error('Failed to unlike post', { error })
 		})
 	},
+	/**
+	 * @param context
+	 * @param {object} root0
+	 * @param {import('../types/Mastodon.js').Status} root0.post
+	 * @param {object} root0.parentAnnounce
+	 */
 	postBoost(context, { post, parentAnnounce }) {
 		return new Promise((resolve, reject) => {
 			axios.post(generateUrl(`apps/social/api/v1/post/boost?postId=${post.id}`)).then((response) => {
@@ -212,6 +278,12 @@ const actions = {
 			})
 		})
 	},
+	/**
+	 * @param context
+	 * @param {object} root0
+	 * @param {import('../types/Mastodon.js').Status} root0.post
+	 * @param {object} root0.parentAnnounce
+	 */
 	postUnBoost(context, { post, parentAnnounce }) {
 		return axios.delete(generateUrl(`apps/social/api/v1/post/boost?postId=${post.id}`)).then((response) => {
 			context.commit('unboostPost', { post, parentAnnounce })
@@ -233,7 +305,7 @@ const actions = {
 	 * @param {number} [params.min_id] - Fetch results immediately newer than ID
 	 * @param {number} [params.limit] - Maximum number of results to return. Defaults to 20 statuses. Max 40 statuses
 	 * @param {number} [params.local] - Show only local statuses? Defaults to false.
-	 * @return {Promise<object>}
+	 * @return {Promise<object[]>}
 	 */
 	async fetchTimeline(context, params = {}) {
 		if (params.limit === undefined) {
@@ -244,15 +316,13 @@ const actions = {
 		let url = ''
 		switch (state.type) {
 		case 'account':
-			// TODO: wait for maxence
-			url = generateUrl(`apps/social/api/v1/timelines/${state.account}`)
+			url = generateUrl(`apps/social/api/v1/accounts/${state.account}/statuses`)
 			break
 		case 'tags':
 			url = generateUrl(`apps/social/api/v1/timelines/tag/${state.params.tag}`)
 			break
 		case 'single-post':
-			// TODO: wait for maxence
-			url = generateUrl(`apps/social/local/v1/post/replies?id=${state.params.id}`)
+			url = generateUrl(`apps/social/api/v1/statuses/${state.params.id}`)
 			break
 		default:
 			url = generateUrl(`apps/social/api/v1/timelines/${state.type}`)
@@ -266,6 +336,10 @@ const actions = {
 
 		return response.data
 	},
+	/**
+	 * @param context
+	 * @param {import('../types/Mastodon.js').Status[]} data
+	 */
 	addToTimeline(context, data) {
 		context.commit('addToTimeline', data)
 	},

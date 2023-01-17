@@ -101,9 +101,9 @@
 
 /**
  * @typedef Account
- * @property {string} id - Ex: "1"
+ * @property {string} id - Ex: "https://example.com/users/@tommy""
  * @property {string} username - Ex: "Gargron"
- * @property {string} acct - Ex: "Gargron"
+ * @property {string} acct - Ex: "Gargron@example.com or Gargron for local users"
  * @property {string} display_name - Ex: "Eugen"
  * @property {boolean} locked - Ex: false
  * @property {boolean} bot - Ex: false
@@ -139,10 +139,10 @@
  * @property {number} replies_count - Ex: 5
  * @property {number} reblogs_count - Ex: 6
  * @property {number} favourites_count - Ex: 11
- * @property {boolean} favourited - Ex: false
- * @property {boolean} reblogged - Ex: false
- * @property {boolean} muted - Ex: false
- * @property {boolean} bookmarked - Ex: false
+ * @property {boolean} [favourited] - Ex: false
+ * @property {boolean} [reblogged] - Ex: false
+ * @property {boolean} [muted] - Ex: false
+ * @property {boolean} [bookmarked] - Ex: false
  * @property {string} content - Ex: "<p>&quot;I lost my inheritance with one wrong digit on my sort code&quot;</p><p><a href=\"https://www.theguardian.com/money/2019/dec/07/i-lost-my-193000-inheritance-with-one-wrong-digit-on-my-sort-code\" rel=\"nofollow noopener noreferrer\" target=\"_blank\"><span class=\"invisible\">https://www.</span><span class=\"ellipsis\">theguardian.com/money/2019/dec</span><span class=\"invisible\">/07/i-lost-my-193000-inheritance-with-one-wrong-digit-on-my-sort-code</span}</p>"
  * @property {number} [reblog] - Ex: null
  * @property {object} [application] -
@@ -156,3 +156,5 @@
  * @property {Card} card -
  * @property {Poll} [poll] - Ex: null
  */
+
+export default {}

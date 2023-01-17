@@ -2,20 +2,21 @@
 	<div class="post-content">
 		<div class="post-header">
 			<div class="post-author-wrapper">
-				<router-link v-if="item.actor_info"
+				<!-- TODO -->
+				<router-link v-if="item.account"
 					:to="{ name: 'profile',
-						params: { account: (item.local && item.type!=='SocialAppNotification') ? item.actor_info.preferredUsername : item.actor_info.account }
+						params: { account: (isLocal && item.type !=='SocialAppNotification') ? item.account.display_name : item.account.username }
 					}">
 					<span class="post-author">
-						{{ userDisplayName(item.actor_info) }}
+						{{ userDisplayName(item.account) }}
 					</span>
 					<span class="post-author-id">
-						@{{ item.actor_info.account }}
+						@{{ item.account.username }}
 					</span>
 				</router-link>
-				<a v-else :href="item.attributedTo">
+				<a v-else :href="item.account.id">
 					<span class="post-author-id">
-						{{ item.attributedTo }}
+						{{ item.account.id }}
 					</span>
 				</a>
 			</div>
@@ -25,12 +26,13 @@
 		</div>
 		<!-- eslint-disable-next-line vue/no-v-html -->
 		<div v-if="item.content" class="post-message">
-			<MessageContent :source="source" />
+			<MessageContent :item="item" />
 		</div>
 		<!-- eslint-disable-next-line vue/no-v-html -->
-		<div v-else class="post-message" v-html="item.actor_info.summary" />
+		<div v-else class="post-message" v-html="item.account.note" />
 		<div v-if="hasAttachments" class="post-attachments">
-			<PostAttachment :attachments="item.attachment" />
+			<!-- TODO: clean media_attachments -->
+			<PostAttachment :attachments="item.media_attachments || []" />
 		</div>
 		<div v-if="$route && $route.params.type !== 'notifications' && !serverData.public" class="post-actions">
 			<NcButton v-tooltip="t('social', 'Reply')"
@@ -64,7 +66,7 @@
 				</template>
 			</NcButton>
 			<NcActions>
-				<NcActionButton v-if="item.actor_info !== undefined && item.actor_info.account === cloudId"
+				<NcActionButton v-if="item.account !== undefined && item.account.acct === cloudId"
 					icon="icon-delete"
 					@click="remove()">
 					{{ t('social', 'Delete') }}
@@ -108,46 +110,60 @@ export default {
 	},
 	mixins: [currentUser],
 	props: {
+		/** @type {import('vue').PropType<import('../types/Mastodon.js').Status>} */
 		item: { type: Object, default: () => {} },
 		parentAnnounce: { type: Object, default: () => {} },
 	},
 	computed: {
+		/**
+		 * @return {string}
+		 */
 		relativeTimestamp() {
-			return moment(this.item.published).fromNow()
+			return moment(this.item.created_at).fromNow()
 		},
+		/**
+		 * @return {number}
+		 */
 		timestamp() {
-			return Date.parse(this.item.published)
+			return Date.parse(this.item.created_at)
 		},
-		source() {
-			if (!this.item.source && this.item.content) {
-				// local posts don't have a source json
-				return {
-					content: this.item.content,
-					tag: [],
-				}
-			}
-			return JSON.parse(this.item.source)
-		},
+		/**
+		 * @return {string}
+		 */
 		avatarUrl() {
-			return generateUrl('/apps/social/api/v1/global/actor/avatar?id=' + this.item.attributedTo)
+			return generateUrl('/apps/social/api/v1/global/actor/avatar?id=' + this.item.account.id)
 		},
+		/**
+		 * @return {boolean}
+		 */
 		hasAttachments() {
-			return (typeof this.item.attachment !== 'undefined')
+			// TODO: clean media_attachments
+			return (this.item.media_attachments || []).length > 0
 		},
+		/**
+		 * @return {boolean}
+		 */
 		isBoosted() {
-			if (typeof this.item.action === 'undefined') {
-				return false
-			}
-			return !!this.item.action.values.boosted
+			return this.item.reblogged === true
 		},
+		/**
+		 * @return {boolean}
+		 */
+
 		isLiked() {
-			if (typeof this.item.action === 'undefined') {
-				return false
-			}
-			return !!this.item.action.values.liked
+			return this.item.favourited === true
 		},
+		/**
+		 * @return {object}
+		 */
 		richParameters() {
 			return {}
+		},
+		/**
+		 * @return {boolean}
+		 */
+		isLocal() {
+			return this.item.account.acct.includes('@')
 		},
 	},
 	methods: {
@@ -158,21 +174,24 @@ export default {
 		 */
 		getSinglePostTimeline(e) {
 			// Display internal or external post
-			if (!this.item.local) {
+			if (!this.isLocal()) {
 				if (this.item.type === 'Note') {
 					window.open(this.item.id)
+					// TODO
 				} else if (this.item.type === 'Announce') {
+					// TODO
 					window.open(this.item.object)
 				} else {
+					// TODO
 					logger.warn("Don't know what to do with posts of type " + this.item.type, { post: this.item })
 				}
 			} else {
 				this.$router.push({
 					name: 'single-post',
 					params: {
-						account: this.item.actor_info.preferredUsername,
+						account: this.item.account.display_name,
 						id: this.item.id,
-						localId: this.item.id.split('/')[this.item.id.split('/').length - 1],
+						localId: this.item.uri.split('/').pop(),
 						type: 'single-post',
 					},
 				})
