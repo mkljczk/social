@@ -64,7 +64,7 @@
 				</template>
 			</NcButton>
 			<NcActions>
-				<NcActionButton v-if="item.actor_info.account === cloudId"
+				<NcActionButton v-if="item.actor_info !== undefined && item.actor_info.account === cloudId"
 					icon="icon-delete"
 					@click="remove()">
 					{{ t('social', 'Delete') }}

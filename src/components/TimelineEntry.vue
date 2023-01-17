@@ -51,6 +51,7 @@ export default {
 		Bell,
 	},
 	props: {
+		/** @type {import('vue').PropType<import('../store/timeline.js').APObject>} */
 		item: {
 			type: Object,
 			default: () => {},
@@ -65,6 +66,9 @@ export default {
 		}
 	},
 	computed: {
+		/**
+		 * @return {import('../store/timeline.js').APObject}
+		 */
 		entryContent() {
 			if (this.item.type === 'Announce') {
 				return this.item.cache[this.item.object].object
@@ -74,20 +78,31 @@ export default {
 				return this.item
 			}
 		},
+		/**
+		 * @return {import('../store/timeline.js').APObject}
+		 */
 		isBoost() {
 			if (this.item.type === 'Announce') {
 				return this.item
 			}
 			return {}
 		},
+		/**
+		 * @return {boolean}
+		 */
 		hasHeader() {
 			return this.item.type === 'Announce' || this.item.type === 'SocialAppNotification'
 		},
+		/**
+		 * @return {string}
+		 */
 		boosted() {
 			return t('social', 'boosted')
 		},
+		/**
+		 * @return {string}
+		 */
 		actionSummary() {
-
 			let summary = this.item.summary
 			for (const key in this.item.details) {
 
