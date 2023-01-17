@@ -32,15 +32,13 @@ import { showError } from '@nextcloud/dialogs'
 import logger from '../services/logger.js'
 
 /**
- * @property {object} timeline - The posts' collection
- * @property {number} since - Time (EPOCH) of the most recent post
+ * @property {Object<string, import('../types/Mastodon.js').Status>} timeline - The posts' collection
  * @property {string} type - Timeline's type: 'home', 'single-post',...
  * @property {object} params - Timeline's parameters
  * @property {string} account -
  */
 const state = {
 	timeline: {},
-	since: Math.floor(Date.now() / 1000) + 1,
 	type: 'home',
 	/**
 	 * @namespace params
@@ -59,19 +57,21 @@ const state = {
 	 */
 	composerDisplayStatus: false,
 }
+
+/** @type {import('vuex').MutationTree<state>} */
 const mutations = {
+	/**
+	 * @param state
+	 * @param {import('../types/Mastodon.js').Status[]} data
+	 */
 	addToTimeline(state, data) {
-		for (const item in data) {
-			state.since = data[item].publishedTime
-			Vue.set(state.timeline, data[item].id, data[item])
-		}
+		data.forEach((post) => Vue.set(state.timeline, post.id, post))
 	},
 	removePost(state, post) {
 		Vue.delete(state.timeline, post.id)
 	},
 	resetTimeline(state) {
 		state.timeline = {}
-		state.since = Math.floor(Date.now() / 1000) + 1
 	},
 	setTimelineType(state, type) {
 		state.type = type
@@ -118,6 +118,8 @@ const mutations = {
 		}
 	},
 }
+
+/** @type {import('vuex').GetterTree<state, any>} */
 const getters = {
 	getComposerDisplayStatus(state) {
 		return state.composerDisplayStatus
@@ -137,6 +139,8 @@ const getters = {
 		}
 	},
 }
+
+/** @type {import('vuex').ActionTree<state, any>} */
 const actions = {
 	changeTimelineType(context, { type, params }) {
 		context.commit('resetTimeline')
@@ -218,35 +222,47 @@ const actions = {
 		})
 	},
 	refreshTimeline(context) {
-		return this.dispatch('fetchTimeline', { sinceTimestamp: Math.floor(Date.now() / 1000) + 1 })
+		return this.dispatch('fetchTimeline')
 	},
-	fetchTimeline(context, { sinceTimestamp }) {
-
-		if (typeof sinceTimestamp === 'undefined') {
-			sinceTimestamp = state.since - 1
+	/**
+	 *
+	 * @param {object} context
+	 * @param {object} params - see https://docs.joinmastodon.org/methods/timelines
+	 * @param {number} [params.since_id] - Fetch results newer than ID
+	 * @param {number} [params.max_id] - Fetch results older than ID
+	 * @param {number} [params.min_id] - Fetch results immediately newer than ID
+	 * @param {number} [params.limit] - Maximum number of results to return. Defaults to 20 statuses. Max 40 statuses
+	 * @param {number} [params.local] - Show only local statuses? Defaults to false.
+	 * @return {Promise<object>}
+	 */
+	async fetchTimeline(context, params = {}) {
+		if (params.limit === undefined) {
+			params.limit = 15
 		}
 
-		// Compute URl to get the data
+		// Compute URL to get the data
 		let url = ''
-		if (state.type === 'account') {
-			url = generateUrl(`apps/social/api/v1/account/${state.account}/stream?limit=25&since=` + sinceTimestamp)
-		} else if (state.type === 'tags') {
-			url = generateUrl(`apps/social/api/v1/stream/tag/${state.params.tag}?limit=25&since=` + sinceTimestamp)
-		} else if (state.type === 'single-post') {
-			url = generateUrl(`apps/social/local/v1/post/replies?id=${state.params.id}&limit=5&since=` + sinceTimestamp)
-		} else {
-			url = generateUrl(`apps/social/api/v1/stream/${state.type}?limit=25&since=` + sinceTimestamp)
+		switch (state.type) {
+		case 'account':
+			// TODO: wait for maxence
+			url = generateUrl(`apps/social/api/v1/timelines/${state.account}`)
+			break
+		case 'tags':
+			url = generateUrl(`apps/social/api/v1/timelines/tag/${state.params.tag}`)
+			break
+		case 'single-post':
+			// TODO: wait for maxence
+			url = generateUrl(`apps/social/local/v1/post/replies?id=${state.params.id}`)
+			break
+		default:
+			url = generateUrl(`apps/social/api/v1/timelines/${state.type}`)
 		}
 
 		// Get the data and add them to the timeline
-		return axios.get(url).then((response) => {
+		const response = await axios.get(url, { params })
 
-			if (response.status === -1) {
-				throw response.message
-			}
-
-			// Add results to timeline
-			context.commit('addToTimeline', response.data.result)
+		// Add results to timeline
+		context.commit('addToTimeline', response.data)
 
 		return response.data
 	},
