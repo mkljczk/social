@@ -100,7 +100,7 @@
  */
 
 /**
- * @typedef Account
+ * @typedef Account - https://docs.joinmastodon.org/entities/Account
  * @property {string} id - Ex: "https://example.com/users/@tommy""
  * @property {string} username - Ex: "Gargron"
  * @property {string} acct - Ex: "Gargron@example.com or Gargron for local users"

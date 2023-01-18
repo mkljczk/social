@@ -23,7 +23,10 @@
 <template>
 	<div class="social__timeline">
 		<transition-group name="list" tag="div">
-			<TimelineEntry v-for="entry in timeline" :key="entry.id" :item="entry" />
+			<TimelineEntry v-for="entry in timeline"
+				:key="entry.id"
+				:item="entry"
+				:type="type" />
 		</transition-group>
 		<InfiniteLoading ref="infiniteLoading" @infinite="infiniteHandler">
 			<div slot="spinner">
@@ -58,7 +61,10 @@ export default {
 	},
 	mixins: [CurrentUserMixin],
 	props: {
-		type: { type: String, default: () => 'home' },
+		type: {
+			type: String,
+			default: () => 'home',
+		},
 	},
 	data() {
 		return {

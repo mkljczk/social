@@ -24,19 +24,19 @@
 	<div v-if="item" class="user-entry">
 		<div class="entry-content">
 			<div class="user-avatar">
-				<NcAvatar v-if="item.local"
+				<NcAvatar v-if="isLocal"
 					:size="32"
-					:user="item.preferredUsername"
+					:user="item.username"
 					:disable-tooltip="true" />
 				<NcAvatar v-else :url="avatarUrl" />
 			</div>
 			<div class="user-details">
-				<router-link v-if="!serverData.public" :to="{ name: 'profile', params: { account: item.local ? item.preferredUsername : item.account }}">
+				<router-link v-if="!serverData.public" :to="{ name: 'profile', params: { account: item.acct }}">
 					<span class="post-author">
-						{{ item.name }}
+						{{ item.display_name }}
 					</span>
 					<span class="user-description">
-						{{ item.account }}
+						{{ item.acct }}
 					</span>
 				</router-link>
 				<a v-else
@@ -44,16 +44,16 @@
 					target="_blank"
 					rel="noreferrer">
 					<span class="post-author">
-						{{ item.name }}
+						{{ item.display_name }}
 					</span>
 					<span class="user-description">
-						{{ item.account }}
+						{{ item.acct }}
 					</span>
 				</a>
 				<!-- eslint-disable-next-line vue/no-v-html -->
-				<p v-html="item.summary" />
+				<p v-html="item.note" />
 			</div>
-			<FollowButton :account="item.account" :uid="cloudId" />
+			<FollowButton :account="item.acct" :uid="cloudId" />
 		</div>
 	</div>
 </template>
@@ -76,7 +76,11 @@ export default {
 		currentUser,
 	],
 	props: {
-		item: { type: Object, default: () => {} },
+		/** @type {import('vue').PropType<import('../types/Mastodon.js').Account>} */
+		item: {
+			type: Object,
+			default: () => {},
+		},
 	},
 	data() {
 		return {
@@ -84,14 +88,17 @@ export default {
 		}
 	},
 	computed: {
-		id() {
-			if (this.item.actor_info) {
-				return this.item.actor_info.id
-			}
-			return this.item.id
-		},
+		/**
+		 * @return {string}
+		 */
 		avatarUrl() {
-			return generateUrl('/apps/social/api/v1/global/actor/avatar?id=' + this.id)
+			return generateUrl('/apps/social/api/v1/global/actor/avatar?id=' + this.item.id)
+		},
+		/**
+		 * @return {boolean}
+		 */
+		isLocal() {
+			return this.item.acct.includes('@')
 		},
 	},
 }

@@ -38,7 +38,7 @@ const addAccount = (state, { actorId, data }) => {
 			follower: false,
 		},
 	}, state.accounts[actorId], data))
-	set(state.accountIdMap, data.account, data.id)
+	set(state.accountIdMap, data.acct, data.id)
 }
 const _getActorIdForAccount = (account) => state.accountIdMap[account]
 
@@ -120,8 +120,8 @@ const getters = {
 const actions = {
 	fetchAccountInfo(context, account) {
 		return axios.get(generateUrl(`apps/social/api/v1/global/account/info?account=${account}`)).then((response) => {
-			context.commit('addAccount', { actorId: response.data.result.account.id, data: response.data.result.account })
-			return response.data.result.account
+			context.commit('addAccount', { actorId: response.data.acct, data: response.data })
+			return response.data
 		}).catch(() => {
 			OC.Notification.showTemporary(`Failed to load account details ${account}`)
 		})

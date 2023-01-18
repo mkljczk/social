@@ -37,6 +37,7 @@ export default {
 		serverData,
 	],
 	props: {
+		/** @type {import('vue').PropType<import('../types/Mastodon.js').MediaAttachment[]>} */
 		attachments: {
 			type: Array,
 			default: Array,
@@ -52,7 +53,7 @@ export default {
 		/**
 		 * @function imageUrl
 		 * @description Returns the URL where to get a resized version of the attachement
-		 * @param {object} item - The attachment
+		 * @param {import('../types/Mastodon.js').MediaAttachment} item - The attachment
 		 * @return {string} The URL
 		 */
 		imageUrl(item) {

@@ -47,8 +47,8 @@
 		<div v-if="replyTo" class="reply-to">
 			<p class="reply-info">
 				<span>{{ t('social', 'In reply to') }}</span>
-				<ActorAvatar :actor="replyTo.actor_info" :size="16" />
-				<strong>{{ replyTo.actor_info.account }}</strong>
+				<ActorAvatar :actor="replyTo.account" :size="16" />
+				<strong>{{ replyTo.account.acct }}</strong>
 				<NcButton type="tertiary"
 					class="close-button"
 					:aria-label="t('social', 'Close reply')"
@@ -182,6 +182,7 @@ export default {
 			previewUrls: [],
 			canType: true,
 			search: '',
+			/** @type {import('../../types/Mastodon.js').Status} */
 			replyTo: null,
 			tributeOptions: {
 				spaceSelectsMatch: true,
@@ -277,6 +278,7 @@ export default {
 		}
 	},
 	computed: {
+		/** @return {string} */
 		postTo() {
 			switch (this.type) {
 			case 'public':
@@ -289,9 +291,11 @@ export default {
 			}
 			return ''
 		},
+		/** @return {string} */
 		currentVisibilityIconClass() {
 			return this.visibilityIconClass(this.type)
 		},
+		/** @return {Function} */
 		visibilityIconClass() {
 			return (type) => {
 				if (typeof type === 'undefined') {
@@ -309,9 +313,11 @@ export default {
 				}
 			}
 		},
+		/** @return {string} */
 		currentVisibilityPostLabel() {
 			return this.visibilityPostLabel(this.type)
 		},
+		/** @return {Function} */
 		visibilityPostLabel() {
 			return (type) => {
 				if (typeof type === 'undefined') {
@@ -329,6 +335,7 @@ export default {
 				}
 			}
 		},
+		/** @return {boolean} */
 		activeState() {
 			return (type) => {
 				if (type === this.type) {
@@ -338,6 +345,7 @@ export default {
 				}
 			}
 		},
+		/** @return {Array} */
 		visibilityPopover() {
 			return [
 				{
@@ -378,12 +386,15 @@ export default {
 				},
 			]
 		},
+		/** @return {string} */
 		container() {
 			return '#content-vue'
 		},
+		/** @return {HTMLElement} */
 		containerElement() {
 			return document.querySelector(this.container)
 		},
+		/** @return {boolean} */
 		canPost() {
 			if (this.previewUrls.length > 0) {
 				return true
@@ -456,7 +467,7 @@ export default {
 
 			// Add author of original post in case of reply
 			if (this.replyTo !== null) {
-				to.push(this.replyTo.actor_info.account)
+				to.push(this.replyTo.account.acct)
 			}
 
 			// Extract hashtags from content and create an array ot of them

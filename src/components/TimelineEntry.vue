@@ -1,6 +1,6 @@
 <template>
 	<div :class="['timeline-entry', hasHeader ? 'with-header' : '']">
-		<div v-if="item.type === 'SocialAppNotification'" class="notification">
+		<div v-if="type === 'SocialAppNotification'" class="notification">
 			<Bell :size="22" />
 			<span class="notification-action">
 				{{ actionSummary }}
@@ -11,8 +11,8 @@
 				<span class="icon-boost" />
 			</div>
 			<div class="boost">
-				<router-link v-if="!isProfilePage && item.account" :to="{ name: 'profile', params: { account: isLocal ? item.account.preferredUsername : item.actor_info.account }}">
-					<span v-tooltip.bottom="item.actor_info.account" class="post-author">
+				<router-link v-if="!isProfilePage && item.account" :to="{ name: 'profile', params: { account: item.account.username }}">
+					<span v-tooltip.bottom="item.account.acct" class="post-author">
 						{{ userDisplayName(item.account) }}
 					</span>
 				</router-link>
@@ -24,13 +24,15 @@
 				{{ boosted }}
 			</div>
 		</template>
-		<UserEntry v-if="item.type === 'SocialAppNotification' && item.details.actor" :key="item.details.actor.id" :item="item.details.actor" />
+		<!-- TODO: fix -->
+		<UserEntry v-if="type === 'SocialAppNotification' && item.account" :key="item.account.id" :item="item.account" />
 		<template v-else>
 			<div class="wrapper">
 				<TimelineAvatar class="entry__avatar" :item="entryContent" />
 				<TimelinePost class="entry__content"
 					:item="entryContent"
-					:parent-announce="isBoost" />
+					:parent-announce="isBoost"
+					:type="type" />
 			</div>
 		</template>
 	</div>
@@ -56,6 +58,10 @@ export default {
 			type: Object,
 			default: () => {},
 		},
+		type: {
+			type: String,
+			required: true,
+		},
 		isProfilePage: {
 			type: Boolean,
 			default: false,
@@ -66,11 +72,12 @@ export default {
 		 * @return {import('../types/Mastodon.js').Status}
 		 */
 		entryContent() {
-			if (this.item.type === 'Announce') {
+			switch (this.type) {
+			case 'Announce':
 				return this.item.cache[this.item.object].object
-			} else if (this.item.type === 'SocialAppNotification') {
+			case 'SocialAppNotification':
 				return this.item.details.post
-			} else {
+			default:
 				return this.item
 			}
 		},
@@ -78,7 +85,7 @@ export default {
 		 * @return {import('../types/Mastodon.js').Status}
 		 */
 		isBoost() {
-			if (this.item.type === 'Announce') {
+			if (this.type === 'Announce') {
 				return this.item
 			}
 			return {}
@@ -87,7 +94,7 @@ export default {
 		 * @return {boolean}
 		 */
 		hasHeader() {
-			return this.item.type === 'Announce' || this.item.type === 'SocialAppNotification'
+			return this.type === 'Announce' || this.type === 'SocialAppNotification'
 		},
 		/**
 		 * @return {string}

@@ -1,11 +1,11 @@
 <template>
-	<div v-if="item.actor_info" class="post-avatar">
-		<NcAvatar v-if="item.local"
+	<div v-if="item.account" class="post-avatar">
+		<NcAvatar v-if="isLocal"
 			class="messages__avatar__icon"
 			:show-user-status="false"
 			menu-position="left"
 			:user="userTest"
-			:display-name="item.actor_info.account"
+			:display-name="item.account.acct"
 			:disable-tooltip="true" />
 		<NcAvatar v-else
 			:url="avatarUrl"
@@ -23,6 +23,7 @@ export default {
 		NcAvatar,
 	},
 	props: {
+		/** @type {import('vue').PropType<import('../types/Mastodon.js').Status>} */
 		item: {
 			type: Object,
 			default: () => {},
@@ -33,13 +34,17 @@ export default {
 		 * @return {string}
 		 */
 		userTest() {
-			return this.item.actor_info.preferredUsername
+			return this.item.account.preferredUsername
 		},
 		/**
 		 * @return {string}
 		 */
 		avatarUrl() {
 			return generateUrl('/apps/social/api/v1/global/actor/avatar?id=' + this.item.account.id)
+		},
+		/** @return {boolean} */
+		isLocal() {
+			return this.item.account.acct.includes('@')
 		},
 	},
 }

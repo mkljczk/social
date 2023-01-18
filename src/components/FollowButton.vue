@@ -22,7 +22,8 @@
 
 <template>
 	<!-- Show button only if user is authenticated and she is not the same as the account viewed -->
-	<div v-if="!serverData.public && accountInfo && accountInfo.viewerLink!='viewer'">
+	<!-- TODO: fix viewerLink -->
+	<div v-if="!serverData.public && accountInfo && accountInfo.viewerLink !='viewer'">
 		<div v-if="isCurrentUserFollowing"
 			class="follow-button-container">
 			<NcButton :disabled="loading"

@@ -69,6 +69,7 @@ export default {
 		}
 	},
 	computed: {
+		/** @return {{backgroundImage: string}} */
 		backgroundStyle() {
 			return {
 				backgroundImage: `url("${this.preview.url}")`,

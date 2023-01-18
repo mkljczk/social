@@ -80,6 +80,7 @@ export default {
 		}
 	},
 	computed: {
+		/** @return {import('../types/Mastodon.js').Account[]} */
 		allResults() {
 			if (this.results.accounts) {
 				if (this.results.accounts.exact) {

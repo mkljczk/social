@@ -5,7 +5,7 @@
 				<!-- TODO -->
 				<router-link v-if="item.account"
 					:to="{ name: 'profile',
-						params: { account: (isLocal && item.type !=='SocialAppNotification') ? item.account.display_name : item.account.username }
+						params: { account: (isLocal && type !=='SocialAppNotification') ? item.account.display_name : item.account.username }
 					}">
 					<span class="post-author">
 						{{ userDisplayName(item.account) }}
@@ -111,8 +111,18 @@ export default {
 	mixins: [currentUser],
 	props: {
 		/** @type {import('vue').PropType<import('../types/Mastodon.js').Status>} */
-		item: { type: Object, default: () => {} },
-		parentAnnounce: { type: Object, default: () => {} },
+		item: {
+			type: Object,
+			default: () => {},
+		},
+		type: {
+			type: String,
+			required: true,
+		},
+		parentAnnounce: {
+			type: Object,
+			default: () => {},
+		},
 	},
 	computed: {
 		/**
@@ -175,15 +185,13 @@ export default {
 		getSinglePostTimeline(e) {
 			// Display internal or external post
 			if (!this.isLocal()) {
-				if (this.item.type === 'Note') {
+				if (this.type === 'Note') {
 					window.open(this.item.id)
-					// TODO
-				} else if (this.item.type === 'Announce') {
+				} else if (this.type === 'Announce') {
 					// TODO
 					window.open(this.item.object)
 				} else {
-					// TODO
-					logger.warn("Don't know what to do with posts of type " + this.item.type, { post: this.item })
+					logger.warn("Don't know what to do with posts of type " + this.type, { post: this.item })
 				}
 			} else {
 				this.$router.push({

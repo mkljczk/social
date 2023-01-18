@@ -106,9 +106,11 @@ export default {
 		}
 	},
 	computed: {
+		/** @return {import('vue').PropType<import('../types/Mastodon.js').Account>} */
 		timeline() {
 			return this.$store.getters.getTimeline
 		},
+		/** @return {{item: object, loading: boolean}} */
 		menu() {
 			const defaultCategories = [
 				{
