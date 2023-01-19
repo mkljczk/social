@@ -23,10 +23,13 @@
  *
  */
 
-import logger from '../services/logger.js'
-import axios from '@nextcloud/axios'
 import Vue from 'vue'
+
+import axios from '@nextcloud/axios'
 import { generateUrl } from '@nextcloud/router'
+import { showError } from '@nextcloud/dialogs'
+
+import logger from '../services/logger.js'
 
 /**
  * @property {object} timeline - The posts' collection
@@ -48,8 +51,10 @@ const state = {
 	 */
 	params: {},
 	account: '',
-	/* Tells whether the composer should be displayed or not.
+	/**
+	 * Tells whether the composer should be displayed or not.
 	 * It's up to the view to honor this status or not.
+	 *
 	 * @member {boolean}
 	 */
 	composerDisplayStatus: false,
@@ -153,7 +158,7 @@ const actions = {
 			})
 			logger.info('Post created with token ' + data.result.token)
 		} catch (error) {
-			OC.Notification.showTemporary('Failed to create a post')
+			showError('Failed to create a post')
 			logger.error('Failed to create a post', { error: error.response })
 		}
 	},
@@ -162,7 +167,7 @@ const actions = {
 			context.commit('removePost', post)
 			logger.info('Post deleted with token ' + response.data.result.token)
 		}).catch((error) => {
-			OC.Notification.showTemporary('Failed to delete the post')
+			showError('Failed to delete the post')
 			logger.error('Failed to delete the post', { error })
 		})
 	},
@@ -172,7 +177,7 @@ const actions = {
 				context.commit('likePost', { post, parentAnnounce })
 				resolve(response)
 			}).catch((error) => {
-				OC.Notification.showTemporary('Failed to like post')
+				showError('Failed to like post')
 				logger.error('Failed to like post', { error: error.response })
 				reject(error)
 			})
@@ -186,7 +191,7 @@ const actions = {
 				context.commit('removePost', post)
 			}
 		}).catch((error) => {
-			OC.Notification.showTemporary('Failed to unlike post')
+			showError('Failed to unlike post')
 			logger.error('Failed to unlike post', { error })
 		})
 	},
@@ -197,7 +202,7 @@ const actions = {
 				logger.info('Post boosted with token ' + response.data.result.token)
 				resolve(response)
 			}).catch((error) => {
-				OC.Notification.showTemporary('Failed to create a boost post')
+				showError('Failed to create a boost post')
 				logger.error('Failed to create a boost post', { error: error.response })
 				reject(error)
 			})
@@ -208,7 +213,7 @@ const actions = {
 			context.commit('unboostPost', { post, parentAnnounce })
 			logger.info('Boost deleted with token ' + response.data.result.token)
 		}).catch((error) => {
-			OC.Notification.showTemporary('Failed to delete the boost')
+			showError('Failed to delete the boost')
 			logger.error('Failed to delete the boost', { error })
 		})
 	},
@@ -243,8 +248,7 @@ const actions = {
 			// Add results to timeline
 			context.commit('addToTimeline', response.data.result)
 
-			return response.data
-		})
+		return response.data
 	},
 	addToTimeline(context, data) {
 		context.commit('addToTimeline', data)
